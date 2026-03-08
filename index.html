@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мартын 8-ны мэнд!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 20px; width: 100%; text-align: center;
+            color: #ff69b4; z-index: 100; pointer-events: none;
+        }
+        h1 { font-size: 1.2rem; text-shadow: 0 0 10px #ff69b4; padding: 0 20px; }
+        .footer { position: absolute; bottom: 20px; width: 100%; text-align: center; color: white; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>Иймэрхүү мэндчилгээ авмаар байсан юм 🌷</h1>
+    </div>
+    <div class="footer">Зүгээр санаа өгч байгаа юм шүү ❤️</div>
+
+    <script>
+        let scene, camera, renderer, group;
+        let images = [
+            'https://www.facebook.com/share/16Me7R7ZuJ/', // Энд өөрийн зургийн линкийг хийж болно
+            'https://www.facebook.com/share/1E9JqM8bXG/',
+            'https://www.facebook.com/share/161zsszYcy/',
+            'https://www.facebook.com/share/1GDBuaDpiQ/',
+            'https://picsum.photos/200/200?random=5',
+            'https://picsum.photos/200/200?random=6',
+            'https://picsum.photos/200/200?random=7',
+            'https://picsum.photos/200/200?random=8'
+        ];
+
+        init();
+        animate();
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            group = new THREE.Group();
+            scene.add(group);
+
+            const loader = new THREE.TextureLoader();
+            
+            // Зургуудыг бөмбөлөг хэлбэрт байршуулах
+            for (let i = 0; i < images.length; i++) {
+                loader.load(images[i], (texture) => {
+                    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+                    const geometry = new THREE.PlaneGeometry(1, 1);
+                    const mesh = new THREE.Mesh(geometry, material);
+
+                    const phi = Math.acos(-1 + (2 * i) / images.length);
+                    const theta = Math.sqrt(images.length * Math.PI) * phi;
+
+                    mesh.position.set(
+                        2 * Math.sin(phi) * Math.cos(theta),
+                        2 * Math.sin(phi) * Math.sin(theta),
+                        2 * Math.cos(phi)
+                    );
+                    mesh.lookAt(0, 0, 0);
+                    group.add(mesh);
+                });
+            }
+
+            // Одод (Stars background)
+            const starGeo = new THREE.BufferGeometry();
+            const starCoords = [];
+            for (let i = 0; i < 1000; i++) {
+                starCoords.push((Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20);
+            }
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+            const stars = THREE.Points(starGeo, starMat);
+            scene.add(stars);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            group.rotation.y += 0.005;
+            group.rotation.x += 0.002;
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
